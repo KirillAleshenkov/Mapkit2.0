@@ -61,7 +61,9 @@ public class MainActivity extends AppCompatActivity implements UserLocationObjec
         points.add(new Point(51.507970, 58.863277));
         mapObjectCollection = mapView.getMap().getMapObjects().addCollection();
         Polyline poly = new Polyline(points);
+        Polygon polygon = new Polygon(new LinearRing(points));
         mapObjectCollection.addPolyline(poly);
+        mapObjectCollection.addPolygon(polygon);
 
 
         //Polygon polygon = Polygon()
