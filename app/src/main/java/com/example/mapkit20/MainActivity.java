@@ -39,7 +39,7 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity implements UserLocationObjectListener {
     private final String MAPKIT_API_KEY = "6953bbfa-0280-46af-a53b-56ece8baa13a";
     private final Point TARGET_LOCATION = new Point(51.2049, 58.5668);
-    private final Point CIRCLE_CENTER = new Point(51.2049, 59.5668);
+    private final Point CIRCLE_CENTER = new Point(51.207970, 58.563277);
     private MapView mapView;
     private PlacemarkMapObject Mark;
     private UserLocationLayer userLocationLayer;
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements UserLocationObjec
         super.onCreate(savedInstanceState);
         mapView = (MapView)findViewById(R.id.mapview);
         mapView.getMap().setRotateGesturesEnabled(true);
-        mapView.getMap().move(new CameraPosition(new Point(0, 0), 14, 0, 0));
+        mapView.getMap().move(new CameraPosition(new Point(51.207970, 58.563277), 14, 0, 0));
         MapKit mapKit = MapKitFactory.getInstance();
         userLocationLayer = mapKit.createUserLocationLayer(mapView.getMapWindow());
         userLocationLayer.setVisible(true);
@@ -70,59 +70,10 @@ public class MainActivity extends AppCompatActivity implements UserLocationObjec
         mapObjectCollection = mapView.getMap().getMapObjects().addCollection();
         Polyline poly = new Polyline(points);
         //mapObjectCollection.addPolyline(poly);
-        PolygonMapObject rect = mapObjectCollection.addPolygon(new Polygon(new LinearRing(points), new ArrayList<LinearRing>()));
-
-
+        //PolygonMapObject rect = mapObjectCollection.addPolygon(new Polygon(new LinearRing(points), new ArrayList<LinearRing>()));
         //Polygon polygon = Polygon()
+        CircleMapObject circle = mapObjectCollection.addCircle(new Circle(CIRCLE_CENTER, 100), Color.BLUE, 200, Color.RED);
     }
-    private MapObjectTapListener circleMapObjectTapListener = new MapObjectTapListener() {
-        @Override
-        public boolean onMapObjectTap(MapObject mapObject, Point point) {
-            if (mapObject instanceof CircleMapObject) {
-                CircleMapObject circle = (CircleMapObject)mapObject;
-
-                float randomRadius = 100.0f + 50.0f * new Random().nextFloat();
-
-                Circle curGeometry = circle.getGeometry();
-                Circle newGeometry = new Circle(curGeometry.getCenter(), randomRadius);
-                circle.setGeometry(newGeometry);
-
-                Object userData = circle.getUserData();
-                if (userData instanceof CircleMapObjectUserData) {
-                    CircleMapObjectUserData circleUserData = (CircleMapObjectUserData)userData;
-
-                    Toast toast = Toast.makeText(
-                            getApplicationContext(),
-                            "Circle with id " + circleUserData.id + " and description '"
-                                    + circleUserData.description + "' tapped",
-                            Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-            }
-            return true;
-        }
-    };
-
-    private class CircleMapObjectUserData {
-        final int id;
-        final String description;
-
-        CircleMapObjectUserData(int id, String description) {
-            this.id = id;
-            this.description = description;
-        }
-    }
-
-    private void createTappableCircle() {
-        CircleMapObject circle = mapObjectCollection.addCircle(
-                new Circle(CIRCLE_CENTER, 100), Color.GREEN, 2, Color.RED);
-        circle.setZIndex(100.0f);
-        circle.setUserData(new CircleMapObjectUserData(42, "Tappable circle"));
-
-        // Client code must retain strong reference to the listener.
-        circle.addTapListener(circleMapObjectTapListener);
-    }
-
 
     @Override
     protected void onStop() {
