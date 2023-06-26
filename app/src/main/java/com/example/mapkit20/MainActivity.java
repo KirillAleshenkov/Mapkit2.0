@@ -3,9 +3,12 @@ package com.example.mapkit20;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
 import android.widget.Toast;
 
 import com.yandex.mapkit.MapKit;
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements UserLocationObjec
     private Context context;
     private ImageProvider iProvider;
     private MapObjectCollection mapObjectCollection;
+    private Handler animationHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +71,63 @@ public class MainActivity extends AppCompatActivity implements UserLocationObjec
         points.add(new Point(53.307970, 59.663277));
         points.add(new Point(52.407970, 60.763277));
         points.add(new Point(51.507970, 62.863277));
+        //mapObjectCollection = mapView.getMap().getMapObjects().addCollection();
         mapObjectCollection = mapView.getMap().getMapObjects().addCollection();
+        animationHandler  = new Handler();
         Polyline poly = new Polyline(points);
         //mapObjectCollection.addPolyline(poly);
         //PolygonMapObject rect = mapObjectCollection.addPolygon(new Polygon(new LinearRing(points), new ArrayList<LinearRing>()));
         //Polygon polygon = Polygon()
-        CircleMapObject circle = mapObjectCollection.addCircle(new Circle(CIRCLE_CENTER, 100), Color.BLUE, 200, Color.RED);
+        //CircleMapObject circle = mapObjectCollection.addCircle(new Circle(CIRCLE_CENTER, 100), Color.BLUE, 200, Color.RED);
+
+        createTappableCircle();
+    }
+    private MapObjectTapListener circleMapObjectTapListener = new MapObjectTapListener() {
+        @Override
+        public boolean onMapObjectTap(MapObject mapObject, Point point) {
+            if (mapObject instanceof CircleMapObject) {
+                CircleMapObject circle = (CircleMapObject)mapObject;
+
+                float randomRadius = 100.0f + 50.0f * new Random().nextFloat();
+
+                Circle curGeometry = circle.getGeometry();
+                Circle newGeometry = new Circle(curGeometry.getCenter(), randomRadius);
+                circle.setGeometry(newGeometry);
+
+                Object userData = circle.getUserData();
+                if (userData instanceof CircleMapObjectUserData) {
+                    CircleMapObjectUserData circleUserData = (CircleMapObjectUserData)userData;
+
+                    Toast toast = Toast.makeText(
+                            getApplicationContext(),
+                            "Circle with id " + circleUserData.id + " and description '"
+                                    + circleUserData.description + "' tapped",
+                            Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+            return true;
+        }
+    };
+
+    private class CircleMapObjectUserData {
+        final int id;
+        final String description;
+
+        CircleMapObjectUserData(int id, String description) {
+            this.id = id;
+            this.description = description;
+        }
+    }
+
+    private void createTappableCircle() {
+        CircleMapObject circle = mapObjectCollection.addCircle(
+                new Circle(CIRCLE_CENTER, 10000), Color.GREEN, 2, Color.RED);
+        circle.setZIndex(100.0f);
+        circle.setUserData(new CircleMapObjectUserData(42, "Tappable circle"));
+
+        // Client code must retain strong reference to the listener.
+       // circle.addTapListener(circleMapObjectTapListener);
     }
 
     @Override
@@ -115,6 +170,10 @@ public class MainActivity extends AppCompatActivity implements UserLocationObjec
     public void onObjectRemoved(UserLocationView view) {
     }
     public void onObjectUpdated(UserLocationView view, ObjectEvent event) {
+    }
+    public void onClick1(View view) {
+        Intent intent = new Intent(MainActivity.this, Desktop.class);
+        startActivity(intent);
     }
 
 }
